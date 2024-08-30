@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
@@ -7,20 +7,29 @@ import { UserContext } from './UserContext';
 
 const EditModal = ({ show, handleModal }) => {
     const { selectedUser, setUserData } = useContext(UserContext);
-    const { register, handleSubmit, formState: { errors, isSubmitted } } = useForm({
-        defaultValues: {
-            name: selectedUser.name,
-            email: selectedUser.email,
-            phone: selectedUser.phone,
-            website: selectedUser.website,
-        }
-    });
+    const { register, handleSubmit, reset, formState: { errors, isSubmitted } } = useForm();
 
-    const handleClose = () => handleModal(false);
+    // Reset form values whenever selectedUser changes
+    useEffect(() => {
+        if (selectedUser) {
+            reset({
+                name: selectedUser.name || '',
+                email: selectedUser.email || '',
+                phone: selectedUser.phone || '',
+                website: selectedUser.website || '',
+            });
+        }
+    }, [selectedUser, reset]);
+
+    const handleClose = () => {
+        handleModal(false);
+    };
 
     const onSubmit = (data) => {
         setUserData(prevData =>
-            prevData.map(user => user.id === selectedUser.id ? { ...user, ...data } : user)
+            prevData.map(user =>
+                user.id === selectedUser.id ? { ...user, ...data } : user
+            )
         );
         handleClose();
     };
